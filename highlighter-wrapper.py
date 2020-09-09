@@ -65,13 +65,13 @@ def usage(err=0):
 def get_styles():
     item = pygments.styles.get_all_styles()
     for items in item:
-        print items
+        print(items)
     sys.exit(0)
 
 def get_lexers():
     item = pygments.lexers.get_all_lexers()
     for items in item:
-        print items[0]+";"+items[1][0]
+        print(items[0]+";"+items[1][0])
     sys.exit(0)
 
 
@@ -99,7 +99,7 @@ if not sys.stdin.isatty():
         code += line
 
     out, stderr = render(code, lang, theme)
-    print(out)
+    sys.stdout.buffer.write(out)
     sys.stderr.write(stderr)
 else:
     print("err : No data on stdin.")
