@@ -221,3 +221,24 @@ div.row {
   display: block;
   margin-left: 8px;
 }
+
+.lineos {
+  display: block;
+  background-color: #f0f0f0;
+  border: solid 1px;
+  border-color: #cccccc;
+  border-radius: 6px;
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.lineodiv{
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+  border: 0px;
+}
+
+#paste > table > tbody > tr > td.linenos > div > pre {
+  margin: 0px;
+  line-height: 125%; 
+}
