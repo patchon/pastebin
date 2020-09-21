@@ -61,6 +61,11 @@ pre {
 
 .highlighttable{
   margin-bottom : 8px;
+  display: inline-block;
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 100%;
+  border: 0;
 }
 
 .form-no-margin{
