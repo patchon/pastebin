@@ -71,7 +71,10 @@ def get_styles():
 def get_lexers():
     item = pygments.lexers.get_all_lexers()
     for items in item:
-        print(items[0]+";"+items[1][0])
+        try:
+            print(items[0]+";"+items[1][0])
+        except IndexError:
+            continue
     sys.exit(0)
 
 
