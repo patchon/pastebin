@@ -1,31 +1,26 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.2
+FROM registry.redhat.io/ubi8/ubi-minimal:8.3
 
 ENV yum_pkgs="iproute \
               git     \
               golang  \
               make    \
               python3 \
-              sqlite"
+              sqlite  \
+              vim"
 
-ENV url_github="https://github.com/patchon/pastebin.git"
-ENV url_pastebin="http://my-pastebin-url"
-ENV url_replace="http://localhost:9999"
-ENV pastebin_title="my-company-pastebin"
+ENV url_pastebin="https://github.com/patchon/pastebin.git"
 
-RUN microdnf install -y ${yum_pkgs}        &&\
+COPY contrib/entrypoint.sh /
+RUN chmod +x /entrypoint.sh                &&\
+    microdnf install -y ${yum_pkgs}        &&\
     microdnf clean all                     &&\
     ln -s /usr/bin/python3 /usr/bin/python &&\
     pip-3 install pygments                 &&\
-    git clone ${url_github}                &&\
+    echo "Cloning"                         &&\
+    git clone ${url_pastebin}              &&\
     cd pastebin                            &&\
     make                                   &&\
-    chmod -R g+wX /pastebin/               &&\
-    sed -i "s|MyCompany|${pastebin_title}|"    config.json   &&\
-    sed -i "s|${url_replace}|${url_pastebin}|" config.json   &&\
-    sed -i "s|${url_replace}|${url_pastebin}|" assets/*.html &&\
-    sed -i 's/localhost/0.0.0.0/' config.json
+    chmod -R g+w /pastebin/
 
-WORKDIR /pastebin
-
-EXPOSE 9999/tcp
-ENTRYPOINT ["./pastebin", "--debug"]
+EXPOSE 8443/tcp
+ENTRYPOINT ["/entrypoint.sh"]

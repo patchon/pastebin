@@ -1,0 +1,210 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: pastebin
+  annotations:
+    description: A simple pastebin written in go
+    tags: pastebin, go
+  labels:
+    app.kubernetes.io/component: pastebin-template
+    app.kubernetes.io/part-of: pastebin
+    app.kubernetes.io/name: pastebin
+objects:
+
+# The imagestream where the pastebin container image will reside
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: pastebin
+    namespace: ${IMAGE_PROJECT}
+    labels:
+      app.kubernetes.io/component: pastebin-is
+      app.kubernetes.io/part-of: pastebin
+      app.kubernetes.io/name: pastebin
+
+
+# The buildconfig that defines how we build pastebin, and where the
+# output should be stored
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
+  metadata:
+    name: pastebin
+    namespace: ${IMAGE_PROJECT}
+    labels:
+      app.kubernetes.io/component: pastebin-bc
+      app.kubernetes.io/part-of: pastebin
+      app.kubernetes.io/name: pastebin
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: pastebin:latest
+    source:
+      git:
+        ref: master
+        uri: ${URL_PASTEBIN_SRC}
+      sourceSecret:
+        name: ${PASTEBIN_SRC_SECRET}
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Dockerfile
+      type: Docker
+
+
+# The deploymentconfig for pastebin, which defines that we (among other things), want
+# 1 replica, and if the pastebin crashes we should restart it. We also define a set of
+# envs that the container should have, which in turn configures our pasebin accordingly
+- kind: Deployment
+  apiVersion: apps/v1
+  metadata:
+    name: pastebin
+    labels:
+      app.kubernetes.io/component: pastebin-dc
+      app.kubernetes.io/part-of: pastebin
+      app.kubernetes.io/name: pastebin
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: pastebin
+        deploymentconfig: pastebin
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/component: pastebin-dc-template
+          app.kubernetes.io/part-of: pastebin
+          app.kubernetes.io/name: pastebin
+          deploymentconfig: pastebin
+      spec:
+        containers:
+        - name: pastebin
+          image: image-registry.openshift-image-registry.svc:5000/${IMAGE_PROJECT}/pastebin:latest
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /assets/pastebin.css
+              port: ${{PORT}}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /assets/pastebin.css
+              port: ${{PORT}}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /assets/pastebin.css
+              port: ${{PORT}}
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          ports:
+          - containerPort: ${{PORT}}
+            protocol: TCP
+          env:
+            - name: PB_NAME
+              value: ${NAME}
+            - name: PB_URL
+              value: ${PROTOCOL}://${ADDRESS}
+    triggers:
+    - type: ConfigChange
+
+
+# The service defined for our pastebin. Will map incomming requests from
+# our route to the pod (container)
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: pastebin
+    labels:
+      app.kubernetes.io/component: pastebin-svc
+      app.kubernetes.io/part-of: pastebin
+      app.kubernetes.io/name: pastebin
+  spec:
+    ports:
+    - name: ${PORT}-tcp
+      port: ${{PORT}}
+      protocol: TCP
+      targetPort: ${{PORT}}
+    selector:
+      app.kubernetes.io/name: pastebin
+    sessionAffinity: None
+    type: ClusterIP
+
+
+# The actual route that will be used for incomming traffic.
+- kind: Route
+  apiVersion: route.openshift.io/v1
+  metadata:
+    name: pastebin
+    labels:
+      app.kubernetes.io/component: pastebin-route
+      app.kubernetes.io/part-of: pastebin
+      app.kubernetes.io/name: pastebin
+  spec:
+    host: ${ADDRESS}
+    port:
+      targetPort: ${PORT}-tcp
+    to:
+      kind: Service
+      name: pastebin
+    wildcardPolicy: None
+    tls:
+      termination: edge
+      certificate: <add-certificate>
+      key: <add-key>
+      caCertificate: <add-ca>
+
+# Input paramaters
+parameters:
+  - name: NAME
+    displayName: Name
+    description: The name of the pastebin, ie. my pastebin
+    value: my pastebin
+    required: true
+
+  - name: ADDRESS
+    displayName: ADDRESS
+    description: The url where the pastebin should be hosted (without https://)
+    required: true
+
+  - name: PROTOCOL
+    displayName: PROTOCOL
+    description: The protocol to use, http or https (without ://)
+    required: true
+    value: https
+
+  - name: PORT
+    displayName: PORT
+    description: The port pastebin should listen on (in the container)
+    required: true
+    value: "8443"
+
+  - name: URL_PASTEBIN_SRC
+    displayName: URL_PASTEBIN_SRC
+    description: The url where the source of the pastebin is located
+    value: ssh://git@github.com:patchon/pastebin.git
+    required: true
+
+  - name: PASTEBIN_SRC_SECRET
+    displayName: PASTEBIN_SRC_SECRET
+    description: The name of the secret containing the ssh key that has access to defined source repository
+    value: sshkey
+    required: true
+
+  - name: IMAGE_PROJECT
+    displayName: IMAGE_PROJECT
+    description: The name of the project where you will have your image stored
+    required: true
