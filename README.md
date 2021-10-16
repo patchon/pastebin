@@ -1,4 +1,4 @@
-#Golang Pastebin
+# Golang Pastebin
 Simple and modern, self-hosted, pastebin built in go.
 
 # Features
