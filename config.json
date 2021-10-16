@@ -7,7 +7,7 @@
   "dbuser": "",
   "dbpassword": "",
   "displayname": "MyCompany",
-  "listenaddress": "localhost",
+  "listenaddress": "0.0.0.0",
   "listenport": "9999",
   "shorturllength": "5",
   "highlighter": "./highlighter-wrapper.py"
