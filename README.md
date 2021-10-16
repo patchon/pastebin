@@ -20,11 +20,11 @@ Simple and modern self-hosted pastebin built in go.
 # Clone and build container image,
 $ > git clone https://github.com/patchon/pastebin
 $ > cd kubernetes
-$ > docker build . -t pastebin:latest
+$ > podman build . -t pastebin:latest
 
 # Upload to your registry
-$ > docker tag pastebin localhost:5000/pastebin
-$ > docker push localhost:5000/pastebin
+$ > podman tag pastebin localhost:5000/pastebin
+$ > podman push localhost:5000/pastebin
 
 # Create namespace and apply resources
 $ > kubectl create ns pastebin
@@ -39,7 +39,7 @@ $ > kubectl logs -f --selector=app.kubernetes.io/name=pastebin
 ```
 ❗ Notes
 * If you are using minkube, you can read about how to use it's docker registry [here](https://minikube.sigs.k8s.io/docs/handbook/pushing/)
-* The image-reference in the deployment (pastebin-k8s.yaml) is set to **localhost:5000/pastebin:latest**, you probably want to update it to reflect your image registry. However if you are using minkube and it's registry, it should work.
+* The image-reference in the deployment (pastebin-k8s.yaml) is set to **localhost:5000/pastebin:latest**, you probably want to update it to reflect your image registry. However if you are using minkube and it's registry, this should work.
 
 
 
