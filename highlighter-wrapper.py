@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/python
 
 import pygments
 from pygments import highlight
