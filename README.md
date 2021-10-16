@@ -1,4 +1,45 @@
 #Golang Pastebin
+Simple and modern, self-hosted, pastebin built in go.
+
+# Features
+* Syntax highlighting with pygments.
+* Clean and simple webinterface
+* RESTful API
+* Small codebase < 1000 lines.
+* Kubernetes and OpenShift native
+
+# Installation
+## Kubernetes
+### Prerequisites
+* A working kubernetes cluster (minikube works)
+* A working container image registry
+* A working docker / podman client
+* A working kubectl client
+
+```bash
+# Clone and build container image,
+$ > git clone https://github.com/patchon/pastebin
+$ > cd kubernetes
+$ > docker build . -t pastebin:latest
+
+# Upload to your registry
+$ > docker tag pastebin localhost:5000/pastebin
+$ > docker push localhost:5000/pastebin
+
+# Create namespace and apply resources
+$ > kubectl create ns pastebin
+$ > kubectl config set-context --current --namespace=pastebin
+$ > kubectl apply -f pastebin-k8s.yaml
+
+# Expose svc (with minikube)
+$ > minikube service
+
+# Check logs
+$ > kubectl logs -f --selector=app.kubernetes.io/name=pastebin
+
+
+# Old, will fix
+#Golang Pastebin
 [![Build Status](https://travis-ci.org/ewhal/Pastebin.svg?branch=master)](https://travis-ci.org/ewhal/Pastebin) [![GoDoc](https://godoc.org/github.com/ewhal/Pastebin?status.svg)](https://godoc.org/github.com/ewhal/Pastebin) [![Go Report Card](https://goreportcard.com/badge/github.com/ewhal/Pastebin)](https://goreportcard.com/report/github.com/ewhal/Pastebin) [![MIT
 licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/ewhal/Pastebin/master/LICENSE.md)
 
@@ -39,4 +80,3 @@ sudo yum install -y go mariadb-server mariadb
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
