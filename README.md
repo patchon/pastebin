@@ -1,5 +1,5 @@
 # Golang Pastebin
-Simple and modern, self-hosted, pastebin built in go.
+Simple and modern self-hosted pastebin built in go.
 
 # Features
 * Syntax highlighting with pygments.
