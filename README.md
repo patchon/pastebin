@@ -36,6 +36,8 @@ $ > minikube service
 
 # Check logs
 $ > kubectl logs -f --selector=app.kubernetes.io/name=pastebin
+```
+
 
 
 # Old, will fix
