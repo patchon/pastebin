@@ -38,7 +38,8 @@ $ > minikube service pastebin
 $ > kubectl logs -f --selector=app.kubernetes.io/name=pastebin
 ```
 ❗ Notes
-* The image-reference in the deployment (pastebin-k8s.yaml) is set to **localhost:5000/pastebin:latest**, you probably want to update it to reflect your image registry.
+* If you are using minkube, you can read about how to use it's docker registry [here](https://minikube.sigs.k8s.io/docs/handbook/pushing/)
+* The image-reference in the deployment (pastebin-k8s.yaml) is set to **localhost:5000/pastebin:latest**, you probably want to update it to reflect your image registry. However if you are using minkube and it's registry, it should work.
 
 
 
