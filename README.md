@@ -22,6 +22,9 @@ $ > git clone https://github.com/patchon/pastebin
 $ > cd kubernetes
 $ > podman build . -t pastebin:latest
 
+# If you use minkube and it's registry
+$ > eval $(minikube docker-env)
+
 # Upload to your registry
 $ > podman tag pastebin localhost:5000/pastebin
 $ > podman push localhost:5000/pastebin
@@ -31,7 +34,7 @@ $ > kubectl create ns pastebin
 $ > kubectl config set-context --current --namespace=pastebin
 $ > kubectl apply -f pastebin-k8s.yaml
 
-# Expose svc (with minikube)
+# If you use minkube
 $ > minikube service pastebin
 
 # Check logs
