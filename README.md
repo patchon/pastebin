@@ -37,8 +37,8 @@ $ > minikube service
 # Check logs
 $ > kubectl logs -f --selector=app.kubernetes.io/name=pastebin
 ```
-❗ Note 
-The image-reference in the deployment (pastebin-k8s.yaml) is set to **localhost:5000/pastebin:latest**, you probably want to update it to reflect your image registry.
+❗ Notes
+* The image-reference in the deployment (pastebin-k8s.yaml) is set to **localhost:5000/pastebin:latest**, you probably want to update it to reflect your image registry.
 
 
 
