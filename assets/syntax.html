@@ -264,16 +264,17 @@
             url = window.location.origin + "/p/{{.PasteId}}/" + lang + "/" + style;
           }
 
-          navigator.clipboard.writeText(url).then(function () {
-            console.log("success");
-            $("#copy").css("color", "#000000");
-            setTimeout(() => {
-              $("#copy").css("color", "#009688");
-              $("#copy").text("Copied to clipboard");
-            }, 100);
-          }, function (err) {
-            $("#copy").text("failed to copy text :/");
-          });
+          var $temp = $("<input>");
+          var $url = $(location).attr('href');
+          $("body").append($temp);
+          $temp.val($url).select();
+          document.execCommand("copy");
+          $temp.remove();
+          $("#copy").css("color", "#000000");
+          setTimeout(() => {
+            $("#copy").css("color", "#009688");
+            $("#copy").text("Copied to clipboard");
+          }, 100);
         })
 
       </script>

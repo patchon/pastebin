@@ -1,0 +1,101 @@
+# The deploymentconfig for pastebin, which defines that we (among other things), want
+# 1 replica, and if the pastebin crashes we should restart it. We also define a set of
+# envs that the container should have, which in turn configures our pasebin accordingly
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: pastebin
+  labels:
+    app.kubernetes.io/component: pastebin-dc
+    app.kubernetes.io/part-of: pastebin
+    app.kubernetes.io/name: pastebin
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pastebin
+      deploymentconfig: pastebin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: pastebin-dc-template
+        app.kubernetes.io/part-of: pastebin
+        app.kubernetes.io/name: pastebin
+        deploymentconfig: pastebin
+    spec:
+      containers:
+      - name: pastebin
+        image: localhost:5000/pastebin:latest
+        ports:
+        - containerPort: 9999
+          protocol: TCP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app.kubernetes.io/component: pastebin-svc
+    app.kubernetes.io/name: pastebin
+    app.kubernetes.io/part-of: pastebin
+  name: pastebin
+spec:
+  allocateLoadBalancerNodePorts: true
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ports:
+  - port: 9999
+    protocol: TCP
+    targetPort: 9999
+  selector:
+    app.kubernetes.io/name: pastebin
+    deploymentconfig: pastebin
+  sessionAffinity: None
+  type: LoadBalancer
+
+
+# # The service defined for our pastebin. Will map incomming requests from
+# # our route to the pod (container)
+# - kind: Service
+#   apiVersion: v1
+#   metadata:
+#     name: pastebin
+#     labels:
+#       app.kubernetes.io/component: pastebin-svc
+#       app.kubernetes.io/part-of: pastebin
+#       app.kubernetes.io/name: pastebin
+#   spec:
+#     ports:
+#     - name: ${PORT}-tcp
+#       port: ${{PORT}}
+#       protocol: TCP
+#       targetPort: ${{PORT}}
+#     selector:
+#       app.kubernetes.io/name: pastebin
+#     sessionAffinity: None
+#     type: ClusterIP
+
+
+# # The actual route that will be used for incomming traffic.
+# - kind: Route
+#   apiVersion: route.openshift.io/v1
+#   metadata:
+#     name: pastebin
+#     labels:
+#       app.kubernetes.io/component: pastebin-route
+#       app.kubernetes.io/part-of: pastebin
+#       app.kubernetes.io/name: pastebin
+#   spec:
+#     host: ${ADDRESS}
+#     port:
+#       targetPort: ${PORT}-tcp
+#     to:
+#       kind: Service
+#       name: pastebin
+#     wildcardPolicy: None
+#     tls:
+#       termination: edge
+#       certificate: <add-certificate>
+#       key: <add-key>
+#       caCertificate: <add-ca>
