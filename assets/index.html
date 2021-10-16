@@ -33,14 +33,12 @@
 
     <div class="well">
       <div class="form-group is-empty form-no-margin">
-        <textarea class="form-control" rows="1" id="title" name="title" placeholder="Title" maxlength="50">{{
-          .PasteTitle }}</textarea>
+        <textarea class="form-control" rows="1" id="title" name="title" placeholder="Title" maxlength="50">{{.PasteTitle}}</textarea>
         <span class="help-block">Paste Title</span>
       </div>
 
       <div class="form-group is-empty form-no-margin">
-        <textarea class="form-control" rows="20" id="paste" name="paste" placeholder="Paste" data-autoresize>{{printf
-          "%s" .Body}}</textarea>
+        <textarea class="form-control" rows="20" id="paste" name="paste" placeholder="Paste" data-autoresize>{{printf "%s" .Body}}</textarea>
         <span class="help-block">Paste your text here</span>
       </div>
     </div>
