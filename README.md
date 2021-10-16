@@ -32,7 +32,7 @@ $ > kubectl config set-context --current --namespace=pastebin
 $ > kubectl apply -f pastebin-k8s.yaml
 
 # Expose svc (with minikube)
-$ > minikube service
+$ > minikube service pastebin
 
 # Check logs
 $ > kubectl logs -f --selector=app.kubernetes.io/name=pastebin
