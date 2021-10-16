@@ -1,72 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ .Title }}</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Material Design fonts -->
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap.material-design/0.5.10/css/bootstrap-material-design.min.css" integrity="sha256-j3CLSRG31GkOu6kaeLh7XsRgL2YNvRl9aOtXoAYt320=" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap.material-design/0.5.10/css/ripples.min.css" integrity="sha256-+Og2qJI9qzvKYwhGo/LYXg0FzE1BhEQfDsUSjKXQ3Bg=" crossorigin="anonymous">
+  <title>{{ .Title }}</title>
 
-    <!-- Sweetalert css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+  <!-- Material Design fonts -->
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/bootstrap.material-design/0.5.10/css/bootstrap-material-design.min.css"
+    integrity="sha256-j3CLSRG31GkOu6kaeLh7XsRgL2YNvRl9aOtXoAYt320=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap.material-design/0.5.10/css/ripples.min.css"
+    integrity="sha256-+Og2qJI9qzvKYwhGo/LYXg0FzE1BhEQfDsUSjKXQ3Bg=" crossorigin="anonymous">
 
-    <!-- pastebin stylesheet -->
-    <link rel="stylesheet" type="text/css" href="/assets/pastebin.css">
-  </head>
+  <!-- Sweetalert css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
 
-  <body>
-    <div class="container">
-      <div class="page-header">
-        <h1 id="page-title">{{ .Title }}</h1>
+  <!-- pastebin stylesheet -->
+  <link rel="stylesheet" type="text/css" href="/assets/pastebin.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1 id="page-title">{{ .Title }}</h1>
+    </div>
+
+    <div class="well">
+      <div class="form-group is-empty form-no-margin">
+        <textarea class="form-control" rows="1" id="title" name="title" placeholder="Title" maxlength="50">{{
+          .PasteTitle }}</textarea>
+        <span class="help-block">Paste Title</span>
       </div>
 
-      <div class="well">
-        <div class="form-group is-empty form-no-margin">
-          <textarea class="form-control" rows="1" id="title" name="title" placeholder="Title" maxlength="50">{{ .PasteTitle }}</textarea>
-          <span class="help-block">Paste Title</span>
-        </div>
-
-        <div class="form-group is-empty form-no-margin" >
-          <textarea class="form-control" rows="20" id="paste" name="paste" placeholder="Paste" data-autoresize>{{printf "%s" .Body}}</textarea>
-          <span class="help-block">Paste your text here</span>
-        </div>
+      <div class="form-group is-empty form-no-margin">
+        <textarea class="form-control" rows="20" id="paste" name="paste" placeholder="Paste" data-autoresize>{{printf
+          "%s" .Body}}</textarea>
+        <span class="help-block">Paste your text here</span>
       </div>
+    </div>
 
-      <div class="row paste-actions">
-        <div class="group col-sm-3" style="margin-right:-30px">
-          <label class="control-label ">Language</label>
-          <div class="btn-group">
-            <a href="javascript:void(0)" id="button-language" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown" value="autodetect">Autodetect</a>
-            <ul class="dropdown-menu dropdown-scrollbar"  id="dropdown-language">
+    <div class="row paste-actions">
+      <div class="group col-sm-3" style="margin-right:-30px">
+        <label class="control-label ">Language</label>
+        <div class="btn-group">
+          <a href="javascript:void(0)" id="button-language" class="btn btn-primary btn-raised dropdown-toggle"
+            data-toggle="dropdown" value="autodetect">Autodetect</a>
+          <ul class="dropdown-menu dropdown-scrollbar" id="dropdown-language">
 
-              <li class="dropdown-item" value="language_autodetect" selected><a> Autodetect </a></li>
-              <li class="dropdown-item" value="language_text"><a> Text </a></li>
+            <li class="dropdown-item" value="language_autodetect" selected><a> Autodetect </a></li>
+            <li class="dropdown-item" value="language_text"><a> Text </a></li>
 
-              <li class="divider"></li>
-              <li class="dropdown-label">Commonly used </li>
-              {{ range $key, $value := .LangsFirst }}
-                <li class="dropdown-item" value="language_{{ $value }}" ><a> {{ $key }}</a></li>
-              {{ end }}
+            <li class="divider"></li>
+            <li class="dropdown-label">Commonly used </li>
+            {{ range $key, $value := .LangsFirst }}
+            <li class="dropdown-item" value="language_{{ $value }}"><a> {{ $key }}</a></li>
+            {{ end }}
 
-              <li class="divider"></li>
-              <li class="dropdown-label">The rest </li>
-              {{ range $key, $value := .LangsLast }}
-                <li class="dropdown-item" value="language_{{ $value }}"><a> {{ $key }}</a></li>
-              {{ end }}
-            </ul>
+            <li class="divider"></li>
+            <li class="dropdown-label">The rest </li>
+            {{ range $key, $value := .LangsLast }}
+            <li class="dropdown-item" value="language_{{ $value }}"><a> {{ $key }}</a></li>
+            {{ end }}
+          </ul>
         </div>
       </div>
 
       <div class="group col-sm-2">
         <label class="control-label">Expiry</label>
         <div class="btn-group">
-          <a href="javascript:void(0)" id="button-expiry" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown" >Forever</a>
+          <a href="javascript:void(0)" id="button-expiry" class="btn btn-primary btn-raised dropdown-toggle"
+            data-toggle="dropdown">Forever</a>
           <ul class="dropdown-menu scrollbar" id="dropdown-expiry">
             <li class="dropdown-item" value="expiry_300"><a>5 minutes</a></li>
             <li class="dropdown-item" value="expiry_3600"><a>1 hour</a></li>
@@ -82,15 +91,16 @@
       <div class="group col-sm-2">
         <label class="control-label">Help</label>
         <div class="btn-group">
-          <a href="javascript:void(0)" id="button-help" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown" >Help</a>
+          <a href="javascript:void(0)" id="button-help" class="btn btn-primary btn-raised dropdown-toggle"
+            data-toggle="dropdown">Help</a>
         </div>
       </div>
 
       <div class="pull-right">
         <label class="control-label ">&nbsp;</label>
-				<div class="row">
+        <div class="row">
           <button class="btn btn-raised btn-primary" id="button-save">Submit<div class="ripple-container"></button>
-				</div>
+        </div>
       </div>
     </div>
 
@@ -98,87 +108,91 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/bootstrap.material-design/0.5.10/js/ripples.min.js" integrity="sha256-TY/EO/++Ug/P+fSBjaqlmtuphCBKwlP7TOnS+SGnN8g=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+      integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+      crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/bootstrap.material-design/0.5.10/js/ripples.min.js"
+      integrity="sha256-TY/EO/++Ug/P+fSBjaqlmtuphCBKwlP7TOnS+SGnN8g=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.5.10/js/material.min.js"></script>
 
     <!-- Sweetalert js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
     <script>
+      $(document).ready(function () {
+        $.material.init();
+        const u = window.location.origin;
 
-    $(document).ready(function(){
-      $.material.init();
+        $("#button-help").click(function () {
 
-       $("#button-help").click(function(){
-
-         swal({
-           title: "Help ",
-           customClass: 'swal-wide',
-           text: "\
+          swal({
+            title: "Help ",
+            customClass: 'swal-wide',
+            text: "\
              <span class='swal-bold'> Create Paste</span> \
-             <span class='swal-code'>echo '{&quot;paste&quot;: &quot;Hello FooBar&quot;}' | curl -H 'Content-Type: application/json' -d @- {{ .UrlAddress }}/api </span> \
+             <span class='swal-code'>echo '{&quot;paste&quot;: &quot;Hello FooBar&quot;}' | curl -H 'Content-Type: application/json' -d @- "+ u + "/api </span> \
              \
              <span class='swal-bold'> Delete Paste </span> \
-             <span class='swal-code'> curl -X DELETE -F 'delkey=insert-your-delete-key-here' {{ .UrlAddress }}/api/{pasteid} </span> \
+             <span class='swal-code'> curl -X DELETE -F 'delkey=insert-your-delete-key-here' "+ u + "/api/{pasteid} </span> \
              \
              <span class='swal-bold'> Show Paste </span> \
-             <span class='swal-code'> {{ .UrlAddress }}/p/{passte-id} </span> \
+             <span class='swal-code'> "+ u + "/p/{passte-id} </span> \
              \
              <span class='swal-bold'> Show Paste with a specific language </span> \
-             <span class='swal-code'> {{ .UrlAddress }}/p/{passte-id}/{language} </span> \
+             <span class='swal-code'> "+ u + "/p/{passte-id}/{language} </span> \
              \
              <span class='swal-bold'> Show Paste with a specific language and style </span> \
-             <span class='swal-code'> {{ .UrlAddress }}/p/{passte-id}/{language}/{style} </span> \
+             <span class='swal-code'> "+ u + "/p/{passte-id}/{language}/{style} </span> \
              <span class='swal-bold'> Notes, </span> \
              <span class='swal-code'> * Languages and Styles are standard components of the Python Syntax Highlighter (pygments)</span><br>\
              \
-             <span class='swal-code'>Source: <a href='https://github.com/ewhal/Pastebin'>Github</a></span>\
-             <span class='swal-code'>Tools: <a href='https://github.com/ewhal/scripts/blob/master/paste.sh'>Paste.sh</a></span>",
-           html: true
-         });
-      });
+             <span class='swal-code'>Source: <a href='https://github.com/patchon/pastebin'>Github</a></span>",
+            html: true
+          });
+        });
 
-      // Bind dropdowns,
-      $(".dropdown-item").click(function(){
-        var action = $(this).attr("value").match(/(language|expiry)_(.*)/);
+        // Bind dropdowns,
+        $(".dropdown-item").click(function () {
+          var action = $(this).attr("value").match(/(language|expiry)_(.*)/);
 
-        if (action.length != 3){
-          return
-        }
-        $("#button-"+action[1]).text($(this).text());
-        $("#button-"+action[1]).attr("value",action[2]);
-      });
+          if (action.length != 3) {
+            return
+          }
+          $("#button-" + action[1]).text($(this).text());
+          $("#button-" + action[1]).attr("value", action[2]);
+        });
 
-      $( "#button-save" ).click(function() {
+        $("#button-save").click(function () {
 
-        // Construct the data,
-        var data_lang   = $("#button-language").attr("value");
-        var data_expiry = $("#button-expiry").attr("value");
-        var data_title  = $("#title").val();
-        var data_paste  = $("#paste").val();
+          // Construct the data,
+          var data_lang = $("#button-language").attr("value");
+          var data_expiry = $("#button-expiry").attr("value");
+          var data_title = $("#title").val();
+          var data_paste = $("#paste").val();
 
-        var json_data = { expiry : data_expiry,
-                          title  : data_title,
-                          paste  : data_paste,
-                          lang   : data_lang,
-                          webreq : true };
-
-        $.ajax({
-            url: "http://localhost:9999/api",
+          var json_data = {
+            expiry: data_expiry,
+            title: data_title,
+            paste: data_paste,
+            lang: data_lang,
+            webreq: true
+          };
+          $.ajax({
+            url: u + "/api",
             type: 'POST',
             contentType: "application/json; charset=utf-8",
-            data:  JSON.stringify(json_data),
+            data: JSON.stringify(json_data),
             dataType: "json",
-            success: function(json){
-              window.location = json.url+"/"+data_lang
+            success: function (json) {
+              window.location = json.url + "/" + data_lang
             },
-              error: function(json){
+            error: function (json) {
               sweetAlert("", json.responseText, "error");
             }
           });
+        });
       });
-    });
     </script>
-  </body>
+</body>
+
 </html>

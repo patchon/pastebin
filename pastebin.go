@@ -34,7 +34,6 @@ import (
 
 // Configuration struct,
 type Configuration struct {
-	Address        string    `json:"address"`    // Url to to the pastebin
 	DBHost         string    `json:"dbhost"`     // Name of your database host
 	DBName         string    `json:"dbname"`     // Name of your database
 	DBPassword     string    `json:"dbpassword"` // The password for the database user
@@ -44,7 +43,6 @@ type Configuration struct {
 	DBType         string    `json:"dbtype"`                // Type of database
 	DBUser         string    `json:"dbuser"`                // The database user
 	DisplayName    string    `json:"displayname"`           // Name of your pastebin
-	GoogleAPIKey   string    `json:"googleapikey"`          // Your google api key
 	Highlighter    string    `json:"highlighter"`           // The name of the highlighter.
 	ListenAddress  string    `json:"listenaddress"`         // Address that pastebin will bind on
 	ListenPort     string    `json:"listenport"`            // Port that pastebin will listen on
@@ -84,19 +82,14 @@ type Request struct {
 type Page struct {
 	Body            template.HTML
 	Expiry          string
-	GoogleAPIKey    string
 	Lang            string
 	LangsFirst      map[string]string
 	LangsLast       map[string]string
+	PasteId         string
 	PasteTitle      string
 	Style           string
 	SupportedStyles map[string]string
 	Title           string
-	UrlAddress      string
-	UrlClone        string
-	UrlDownload     string
-	UrlHome         string
-	UrlRaw          string
 	WrapperErr      string
 }
 
@@ -365,7 +358,7 @@ func shaPaste(paste string) string {
 // paste, the actual paste data as a string,
 // expiry, the epxpiry date in epoch time as an int64
 // Returns the Response struct
-func savePaste(title string, paste string, expiry int64) Response {
+func savePaste(title string, paste string, expiry int64, hostname string) Response {
 
 	var id, hash, delkey, url string
 
@@ -391,19 +384,18 @@ func savePaste(title string, paste string, expiry int64) Response {
 		loggy(fmt.Sprintf("Pasted data already exists at id '%s' with title '%s'.",
 			id, html.UnescapeString(title)))
 
-		url = configuration.Address + "/p/" + id
 		return Response{
 			Status: "Paste data already exists ...",
 			Id:     id,
 			Title:  title,
-			Sha1:   hash,
 			Url:    url,
+			Sha1:   hash,
 			Size:   len(paste)}
 	}
 
 	// Generate id,
 	id = generateName()
-	url = configuration.Address + "/p/" + id
+	url = hostname + "/p/" + id
 
 	// Set expiry if it's specified,
 	if expiry != 0 {
@@ -485,6 +477,7 @@ func DelHandler(w http.ResponseWriter, r *http.Request) {
 // SaveHandler will handle the actual save of each paste.
 // Returns with a Response struct.
 func SaveHandler(w http.ResponseWriter, r *http.Request) {
+	loggy(fmt.Sprintf("url=%s host=%s method=%s", r.URL.String(), r.Host, r.Method))
 
 	var inData Request
 
@@ -516,7 +509,13 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := savePaste(inData.Title, inData.Paste, inData.Expiry)
+	// Hmm, not sure why this why this is not in the request,
+	scheme := "http://"
+	if r.TLS != nil {
+		scheme = "https://"
+	}
+
+	p := savePaste(inData.Title, inData.Paste, inData.Expiry, scheme+r.Host)
 
 	d, _ = json.MarshalIndent(p, "DEBUG : ", "  ")
 	loggy(fmt.Sprintf("Returning json data to requester \nDEBUG : %s", d))
@@ -539,44 +538,66 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 // the second is a custom message
 func high(paste string, lang string, style string) (string, string, string, string) {
 
+	// Defaults
+	var default_lang, default_style string
+	default_lang = "autodetect"
+	default_style = "manni"
+
 	// Lets loop through the supported languages to catch if the user is doing
 	// something fishy. We do this to be extra safe since we are making an
 	// an external call with user input.
-	var supported_lang, supported_styles bool
+	var supported_lang, supported_style bool
 	supported_lang = false
-	supported_styles = false
-
-	for _, v1 := range listOfLangsFirst {
-		if lang == v1 {
-			supported_lang = true
-		}
-	}
-
-	for _, v2 := range listOfLangsLast {
-		if lang == v2 {
-			supported_lang = true
-		}
-	}
+	supported_style = false
 
 	if lang == "" {
-		lang = "autodetect"
-	}
-
-	if !supported_lang && lang != "autodetect" {
-		lang = "text"
-		loggy(fmt.Sprintf("Given language ('%s') not supported, using 'text'", lang))
-	}
-
-	for _, s := range listOfStyles {
-		if style == strings.ToLower(s) {
-			supported_styles = true
+		lang = default_lang
+		supported_lang = true
+		loggy(fmt.Sprintf("Language is not set, will set to '%s'", default_lang))
+	} else {
+		// Check for supported languages
+		for _, v1 := range listOfLangsFirst {
+			if lang == v1 {
+				supported_lang = true
+			}
 		}
+
+		for _, v2 := range listOfLangsLast {
+			if lang == v2 {
+				supported_lang = true
+			}
+		}
+
+		if lang == default_lang {
+			supported_lang = true
+		}
+	}
+
+	if supported_lang {
+		loggy(fmt.Sprintf("Language set to '%s'", lang))
+	} else {
+		loggy(fmt.Sprintf("Requested language ('%s') is not supported, using '%s' as default",
+			lang, default_lang))
 	}
 
 	// Same with the styles,
-	if !supported_styles {
-		style = "manni"
-		loggy(fmt.Sprintf("Given style ('%s') not supported, using ", style))
+	if style == "" {
+		style = default_style
+		supported_style = true
+		loggy(fmt.Sprintf("Style is not set, will set to '%s'", default_style))
+	} else {
+		for _, s := range listOfStyles {
+			if style == strings.ToLower(s) {
+				supported_style = true
+			}
+		}
+	}
+
+	if supported_style {
+		loggy(fmt.Sprintf("Style set to '%s'", style))
+	} else {
+		loggy(fmt.Sprintf("Requested style ('%s') is not supported, using '%s' as default",
+			style, default_style))
 	}
 
 	if _, err := os.Stat(configuration.Highlighter); os.IsNotExist(err) {
@@ -708,16 +729,20 @@ func APIHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&inData)
 
-	//if err != nil {
-	//   http.Error(w, err.Error(), http.StatusInternalServerError)
-	//  return
-	//}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	loggy(fmt.Sprintf("Getting paste with id '%s' and lang '%s' and style '%s'.",
 		pasteId, inData.Lang, inData.Style))
 
 	// Get the actual paste data,
 	p := getPaste(pasteId)
+	if p.Status == "Requested paste doesn't exist." {
+		notfoundHandler(w, pasteId)
+		return
+	}
 
 	if inData.WebReq {
 		// If no style is given, use default style,
@@ -748,6 +773,20 @@ func APIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func notfoundHandler(w http.ResponseWriter, pasteId string) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	resp := make(map[string]string)
+	resp["404"] = "Paste with id " + pasteId + " not found"
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		loggy(fmt.Sprintf("Could not create 404 json (%s)", err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 // pasteHandler generates the html paste pages
 func pasteHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -760,6 +799,10 @@ func pasteHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the actual paste data,
 	p := getPaste(pasteId)
+	if p.Status == "Requested paste doesn't exist." {
+		notfoundHandler(w, pasteId)
+		return
+	}
 
 	// Run it through the highgligther.,
 	p.Paste, p.Extra, p.Lang, p.Style = high(p.Paste, lang, style)
@@ -771,14 +814,10 @@ func pasteHandler(w http.ResponseWriter, r *http.Request) {
 		Lang:            p.Lang,
 		LangsFirst:      listOfLangsFirst,
 		LangsLast:       listOfLangsLast,
+		PasteId:         pasteId,
 		Style:           p.Style,
 		SupportedStyles: listOfStyles,
 		Title:           p.Title,
-		GoogleAPIKey:    configuration.GoogleAPIKey,
-		UrlClone:        configuration.Address + "/clone/" + pasteId,
-		UrlDownload:     configuration.Address + "/download/" + pasteId,
-		UrlHome:         configuration.Address,
-		UrlRaw:          configuration.Address + "/raw/" + pasteId,
 		WrapperErr:      p.Extra,
 	}
 
@@ -791,9 +830,13 @@ func pasteHandler(w http.ResponseWriter, r *http.Request) {
 // CloneHandler handles generating the clone pages
 func CloneHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	paste := vars["pasteId"]
+	pasteId := vars["pasteId"]
 
-	p := getPaste(paste)
+	p := getPaste(pasteId)
+	if p.Status == "Requested paste doesn't exist." {
+		notfoundHandler(w, pasteId)
+		return
+	}
 
 	loggy(p.Paste)
 
@@ -816,9 +859,13 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	pasteId := vars["pasteId"]
 
 	p := getPaste(pasteId)
+	if p.Status == "Requested paste doesn't exist." {
+		notfoundHandler(w, pasteId)
+		return
+	}
 
 	// Set header to an attachment so browser will automatically download it
-	w.Header().Set("Content-Disposition", "attachment; filename="+p.Paste)
+	w.Header().Set("Content-Disposition", "attachment; filename="+p.Title)
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
 	io.WriteString(w, p.Paste)
 }
@@ -829,6 +876,11 @@ func RawHandler(w http.ResponseWriter, r *http.Request) {
 	pasteId := vars["pasteId"]
 
 	p := getPaste(pasteId)
+	if p.Status == "Requested paste doesn't exist." {
+		notfoundHandler(w, pasteId)
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/plain; charset=UTF-8; imeanit=yes")
 
 	// Simply write string to browser
@@ -842,7 +894,6 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 		LangsFirst: listOfLangsFirst,
 		LangsLast:  listOfLangsLast,
 		Title:      configuration.DisplayName,
-		UrlAddress: configuration.Address,
 	}
 
 	err := templates.ExecuteTemplate(w, "index.html", p)

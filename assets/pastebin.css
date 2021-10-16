@@ -73,7 +73,7 @@ pre {
 }
 
 .linenodiv {
-  background    : none;
+  background    : rgb(240, 240, 240);
   border        : solid 1px #ccc;
   border-radius : 6px;
   display       : none;
@@ -224,7 +224,8 @@ div.row {
 
 #paste > table > tbody > tr > td.linenos > div > pre {
   margin: 0px;
-  line-height: 125%; 
+  line-height: 125%;
   background-color: #f0f0f0;
   border-radius: 6px;
+  margin: 5px;
 }
