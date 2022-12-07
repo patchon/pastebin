@@ -7,7 +7,8 @@ dbname=$(shell grep dbname config.json | cut -d \" -f 4)
 dbtable=$(shell grep dbtable config.json | cut -d \" -f 4)
 
 all: clean install build
-
+	GO111MODULE=auto
+	
 build:
 	gofmt -w pastebin.go
 	go build $(GOFLAGS) ./...
@@ -30,6 +31,6 @@ bench: install
 	go test -run=NONE -bench=. $(GOFLAGS) ./...
 
 clean:
-	go clean $(GOFLAGS) -i ./...
+	go clean $(GOFLAGS)
 	rm -rf ./build
 	rm -rf pastebin.db
