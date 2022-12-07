@@ -8,6 +8,7 @@ ENV yum_pkgs="git     \
               "
 
 ENV url_pastebin="https://github.com/patchon/pastebin.git"
+ENV GO111MODULE=auto
 
 RUN microdnf install -y ${yum_pkgs}        &&\
     microdnf clean all                     &&\
