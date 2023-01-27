@@ -897,6 +897,8 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 		Title:      configuration.DisplayName,
 	}
 
+	gets++
+	
 	err := templates.ExecuteTemplate(w, "index.html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
