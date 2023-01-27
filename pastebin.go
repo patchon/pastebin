@@ -105,6 +105,7 @@ var debugLogger *log.Logger
 var listOfLangsFirst map[string]string
 var listOfLangsLast map[string]string
 var listOfStyles map[string]string
+var gets int
 
 //
 // Functions below,
@@ -902,6 +903,17 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// MetricsHandler handles generating metrics
+func MetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "text/plain; charset=UTF-8; imeanit=yes")
+
+	str := "http_requests_total{method=\"any\"} "
+	str += strconv.Itoa(gets)
+
+	io.WriteString(w, str)
+}
+
 func serveCss(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "assets/pastebin.css")
 }
@@ -961,6 +973,9 @@ func main() {
 	router.HandleFunc("/download/{pasteId}", DownloadHandler).Methods("GET")
 	router.HandleFunc("/assets/pastebin.css", serveCss).Methods("GET")
 
+	// Metrics
+	router.HandleFunc("/metrics", MetricsHandler)
+	
 	// Set up server,
 	srv := &http.Server{
 		Handler:      router,
